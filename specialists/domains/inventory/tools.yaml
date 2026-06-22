@@ -1,0 +1,98 @@
+domain: inventory
+version: "1.0"
+tools:
+  - name: get_inventory
+    description: >
+      Check current stock levels for a product. Returns available quantity
+      at the specified warehouse, or across all warehouses if none is specified.
+    parameters:
+      product_id:
+        type: string
+        required: true
+        description: The product SKU identifier (e.g. "SKU-123").
+      warehouse:
+        type: string
+        required: false
+        description: >
+          Warehouse location code (e.g. "WH-A", "WH-B").
+          Omit to aggregate across all warehouses.
+
+  - name: reserve_stock
+    description: >
+      Reserve a specific quantity of a product against an order ID.
+      Fails if insufficient stock is available.
+    parameters:
+      product_id:
+        type: string
+        required: true
+        description: The product SKU identifier.
+      quantity:
+        type: integer
+        required: true
+        description: Number of units to reserve. Must be a positive integer.
+      order_id:
+        type: string
+        required: true
+        description: The order ID the reservation is tied to (e.g. "ORD-456").
+
+  - name: release_reservation
+    description: >
+      Release a previously made stock reservation, returning units to
+      available inventory. Use when an order is cancelled.
+    parameters:
+      order_id:
+        type: string
+        required: true
+        description: The order ID whose reservation should be released.
+      product_id:
+        type: string
+        required: false
+        description: >
+          Product SKU to release. If omitted, releases all products
+          reserved under this order.
+
+  - name: reorder_product
+    description: >
+      Trigger a purchase order to restock a product when inventory is low.
+    parameters:
+      product_id:
+        type: string
+        required: true
+        description: The product SKU to reorder.
+      quantity:
+        type: integer
+        required: true
+        description: Number of units to order.
+      supplier_id:
+        type: string
+        required: false
+        description: >
+          Preferred supplier ID. If omitted, the default supplier for
+          this product is used.
+
+  - name: transfer_stock
+    description: >
+      Move units of a product between two warehouses.
+    parameters:
+      product_id:
+        type: string
+        required: true
+        description: The product SKU to transfer.
+      from_warehouse:
+        type: string
+        required: true
+        description: Source warehouse code.
+      to_warehouse:
+        type: string
+        required: true
+        description: Destination warehouse code.
+      quantity:
+        type: integer
+        required: true
+        description: Number of units to transfer.
+
+  - name: no_tool
+    description: >
+      Use when no available tool matches the user's request, or when the
+      request is ambiguous and cannot be safely resolved to a single tool call.
+    parameters: {}

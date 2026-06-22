@@ -1,0 +1,104 @@
+domain: email
+version: "1.0"
+tools:
+  - name: send_email
+    description: >
+      Send an email to one or more recipients.
+      Use when the user explicitly wants to send a message.
+    parameters:
+      to:
+        type: string
+        required: true
+        description: >
+          Recipient email address or comma-separated list of addresses.
+      subject:
+        type: string
+        required: true
+        description: Email subject line.
+      body:
+        type: string
+        required: true
+        description: Plain-text email body.
+      cc:
+        type: string
+        required: false
+        description: CC recipients (comma-separated). Omit if not mentioned.
+      bcc:
+        type: string
+        required: false
+        description: BCC recipients. Omit if not mentioned.
+
+  - name: draft_email
+    description: >
+      Save an email as a draft without sending.
+      Use when the user wants to compose or prepare an email for later review.
+    parameters:
+      to:
+        type: string
+        required: false
+        description: Intended recipient(s). May be empty if recipient is not yet known.
+      subject:
+        type: string
+        required: true
+        description: Draft subject line.
+      body:
+        type: string
+        required: true
+        description: Draft body text.
+
+  - name: list_emails
+    description: >
+      Retrieve a list of emails from a folder (inbox, sent, drafts, etc.).
+      Use when the user wants to see or browse their emails.
+    parameters:
+      folder:
+        type: string
+        required: false
+        description: Folder to list (inbox, sent, drafts, spam, trash). Defaults to inbox.
+        enum: [inbox, sent, drafts, spam, trash]
+      limit:
+        type: integer
+        required: false
+        description: Maximum number of emails to return. Defaults to 20.
+      unread_only:
+        type: boolean
+        required: false
+        description: If true, only return unread emails.
+
+  - name: search_emails
+    description: >
+      Search emails by keyword, sender, subject, or date range.
+      Use when the user wants to find specific emails.
+    parameters:
+      query:
+        type: string
+        required: true
+        description: Full-text search query or structured filter (e.g. "from:alice subject:invoice").
+      folder:
+        type: string
+        required: false
+        description: Restrict search to this folder. Omit to search all folders.
+      limit:
+        type: integer
+        required: false
+        description: Maximum results. Defaults to 10.
+
+  - name: delete_email
+    description: >
+      Move an email to the trash or permanently delete it.
+      Use only when the user explicitly says to delete, remove, or trash an email.
+    parameters:
+      email_id:
+        type: string
+        required: true
+        description: Unique identifier of the email to delete.
+      permanent:
+        type: boolean
+        required: false
+        description: If true, permanently delete (bypass trash). Defaults to false.
+
+  - name: no_tool
+    description: >
+      Use when no email tool is appropriate for the request.
+      Examples: questions about policies, ambiguous requests, or non-email tasks.
+    parameters: {}

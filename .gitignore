@@ -1,0 +1,99 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+wheels/
+pip-wheel-metadata/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+ENV/
+
+# Installer / package managers
+pip-log.txt
+pip-delete-this-directory.txt
+.installed.cfg
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.lcov
+.tox/
+nosetests.xml
+test-results/
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+.pyright/
+.ruff_cache/
+
+# Databases (generated at runtime)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Adapters / model weights (large binary artifacts)
+adapters/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+*.ggml
+
+# HuggingFace cache
+.cache/
+~/.cache/huggingface/
+
+# Training / pipeline artefacts
+runs/
+outputs/
+checkpoints/
+logs/
+*.log
+wandb/
+mlruns/
+
+# JSONL data files
+*.jsonl
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment variable files
+.env
+.env.*
+!.env.example
+
+# Docs
+docs/
+
+# Markdown files
+*.md

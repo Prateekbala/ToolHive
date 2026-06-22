@@ -1,0 +1,78 @@
+version: "3.9"
+
+# ToolHive — single-file deployment
+#
+# Quick start:
+#   cp .env.example .env   # fill in TOOLHIVE_PROVIDER_API_KEY
+#   docker-compose up
+#
+# Then:
+#   curl http://localhost:8000/health
+#   open http://localhost:8080        # dashboard
+
+services:
+
+  # ── Inference server ──────────────────────────────────────────────────────
+  server:
+    build: .
+    command: uvicorn server.app:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      TOOLHIVE_REGISTRY_DB:      /data/registry.db
+      TOOLHIVE_FEEDBACK_DB:      /data/feedback.db
+      TOOLHIVE_BASE_MODEL:       ${TOOLHIVE_BASE_MODEL:-Qwen/Qwen2.5-3B-Instruct}
+      TOOLHIVE_PROVIDER_API_KEY: ${TOOLHIVE_PROVIDER_API_KEY:-}
+      TOOLHIVE_PROVIDER_MODEL:   ${TOOLHIVE_PROVIDER_MODEL:-gpt-4o-mini}
+      TOOLHIVE_PROVIDER_BASE_URL: ${TOOLHIVE_PROVIDER_BASE_URL:-https://api.openai.com/v1}
+      TOOLHIVE_CRITIC_ENABLED:   ${TOOLHIVE_CRITIC_ENABLED:-1}
+    volumes:
+      - toolhive_data:/data
+      - ./specialists/domains:/app/specialists/domains:ro  # mount domain definitions
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Dashboard ─────────────────────────────────────────────────────────────
+  dashboard:
+    build: .
+    command: uvicorn dashboard.api:app --host 0.0.0.0 --port 8080
+    ports:
+      - "8080:8080"
+    environment:
+      TOOLHIVE_REGISTRY_DB:   /data/registry.db
+      TOOLHIVE_FEEDBACK_DB:   /data/feedback.db
+      TOOLHIVE_STATE_DB:      /data/scheduler_state.db
+      TOOLHIVE_ALERT_WEBHOOK: ${TOOLHIVE_ALERT_WEBHOOK:-}
+      TOOLHIVE_ALERT_THRESHOLD: ${TOOLHIVE_ALERT_THRESHOLD:-0.20}
+    volumes:
+      - toolhive_data:/data
+    depends_on:
+      server:
+        condition: service_healthy
+
+  # ── Retrain scheduler (opt-in, run manually or as a cron job) ────────────
+  #
+  # Usage:
+  #   docker-compose --profile scheduler run --rm scheduler \
+  #     python -m scheduler.retrain --specialist inv-v1
+  scheduler:
+    build: .
+    command: python -m scheduler.retrain --help
+    environment:
+      TOOLHIVE_REGISTRY_DB:      /data/registry.db
+      TOOLHIVE_FEEDBACK_DB:      /data/feedback.db
+      TOOLHIVE_STATE_DB:         /data/scheduler_state.db
+      TOOLHIVE_PROVIDER_API_KEY: ${TOOLHIVE_PROVIDER_API_KEY:-}
+      TOOLHIVE_PROVIDER_MODEL:   ${TOOLHIVE_PROVIDER_MODEL:-gpt-4o-mini}
+      TOOLHIVE_PROVIDER_BASE_URL: ${TOOLHIVE_PROVIDER_BASE_URL:-https://api.openai.com/v1}
+    volumes:
+      - toolhive_data:/data
+      - ./adapters:/app/adapters  # trained adapters persisted on host
+    profiles:
+      - scheduler
+
+volumes:
+  toolhive_data:
