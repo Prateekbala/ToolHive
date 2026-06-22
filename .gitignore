@@ -95,5 +95,6 @@ Thumbs.db
 # Docs
 docs/
 
-# Markdown files
+# Markdown files (keep README.md tracked)
 *.md
+!README.md
